@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// Usuários do sistema: médicos e admins
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(MEDIC)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relação com consultas
+  appointments Appointment[]
+}
+
+// Clientes (donos de pets)
+model Client {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relação com pets
+  pets Pet[]
+  // Relação com consultas
+  appointments Appointment[]
+}
+
+// Pets
+model Pet {
+  id        Int       @id @default(autoincrement())
+  name      String
+  species   String
+  breed     String?
+  age       Int?
+  clientId  Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relações
+  client Client @relation(fields: [clientId], references: [id])
+  appointments Appointment[]
+}
+
+// Consultas/Agendamentos
+model Appointment {
+  id        Int       @id @default(autoincrement())
+  date      DateTime
+  reason    String
+  userId    Int       // médico
+  clientId  Int       // dono do pet
+  petId     Int       // pet
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relações
+  user   User   @relation(fields: [userId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+  pet    Pet    @relation(fields: [petId], references: [id])
+}
+
+// Enum para o tipo de usuário
+enum Role {
+  MEDIC
+  ADMIN
+}

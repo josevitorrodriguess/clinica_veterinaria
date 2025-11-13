@@ -4,6 +4,7 @@ import cors from "cors";
 
 
 dotenv.config();
+console.log(process.env.DATAB)
 
 const app = express();
 app.use(express.json());
