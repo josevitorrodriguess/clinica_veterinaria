@@ -1,44 +1,37 @@
 import { PrismaClient, User } from "../generated/prisma";
 import { CreateUserData } from "../schema/userSchema";
 
-export class UserService {
-	private prisma: PrismaClient;
+const prisma = new PrismaClient();
 
-	constructor() {
-		this.prisma = new PrismaClient();
-	}
+export async function createUser(user: CreateUserData): Promise<User> {
+  const { name, email, password } = user;
+  return prisma.user.create({
+    data: {
+      name,
+      email,
+      password,
+    },
+  });
+}
 
-	async createUser(user: CreateUserData): Promise<User> {
-		const { name, email, password } = user;
+export async function getUserById(userId: string): Promise<User | null> {
+  return prisma.user.findUnique({
+    where: { id: userId },
+  });
+}
 
-		return this.prisma.user.create({
-			data: {
-				name,
-				email,
-				password,
-			},
-		});
-	}
+export async function getByEmail(email: string): Promise<User | null> {
+  return prisma.user.findUnique({
+    where: { email: email },
+  });
+}
 
-	async getUserById(userId: string): Promise<User | null> {
-		return this.prisma.user.findUnique({
-			where: { id: userId },
-		});
-	}
+export async function getAllUsers(): Promise<User[]> {
+  return prisma.user.findMany();
+}
 
-	async getByEmail(email: string): Promise<User | null> {
-		return this.prisma.user.findUnique({
-			where: { email },
-		});
-	}
-
-	async getAllUsers(): Promise<User[]> {
-		return this.prisma.user.findMany();
-	}
-
-	async deleteUser(userId: string): Promise<User> {
-		return this.prisma.user.delete({
-			where: { id: userId },
-		});
-	}
+export async function deleteUser(userId: string): Promise<User> {
+  return prisma.user.delete({
+    where: { id: userId },
+  });
 }
