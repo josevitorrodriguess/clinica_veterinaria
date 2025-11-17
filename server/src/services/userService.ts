@@ -1,5 +1,6 @@
 import { PrismaClient, User } from "../generated/prisma";
 import { CreateUserData } from "../schema/userSchema";
+import { hashPassword } from "../utils/hashPass";
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,8 @@ export async function createUser(user: CreateUserData): Promise<User> {
     data: {
       name,
       email,
-      password,
+      password: await hashPassword(password)
+      ,
     },
   });
 }
