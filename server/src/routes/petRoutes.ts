@@ -8,7 +8,6 @@ const router = Router();
 router.post("/pets", validateBody(createPetData), petController.createPet);
 router.get("/pets/:id", petController.getPetById);
 router.get("/pets", petController.getAllPets);
-router.get("/pets/client/:clientId", petController.getPetsByClientId);
 router.delete("/pets/:id", petController.deletePet);
 
 export default router;

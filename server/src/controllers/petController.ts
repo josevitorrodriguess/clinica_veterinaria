@@ -42,11 +42,4 @@ export const deletePet = async (req: Request, res: Response) => {
 	}
 };
 
-export const getPetsByClientId = async (req: Request, res: Response) => {
-	try {
-		const pets = await petService.getPetsByClientId(req.params.clientId);
-		res.status(200).json(pets);
-	} catch (error) {
-		res.status(400).json({ error: (error as Error).message });
-	}
-};
+

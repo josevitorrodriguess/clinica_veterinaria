@@ -1,40 +1,39 @@
-import { PrismaClient, Pet } from "../generated/prisma";
+import { PrismaClient } from "../generated/prisma";
 import { CreatePetData } from "../schema/petSchema";
 
 const prisma = new PrismaClient();
 
-export async function createPet(data: CreatePetData): Promise<Pet> {
-  const { name, species, breed, age, clientId } = data;
+export async function createPet(data: CreatePetData) {
+  return prisma.pet.create({ data });
+}
 
-  return prisma.pet.create({
-    data: {
-      name,
-      species,
-      breed,
-      age,
-      clientId,
-    },
+
+export async function getAllPets() {
+  return prisma.pet.findMany({
+    include: {
+      client: { select: { id: true, name: true } }
+    }
   });
 }
 
-export async function getPetById(id: string): Promise<Pet | null> {
+
+export async function getPetById(id: string) {
   return prisma.pet.findUnique({
     where: { id },
+    include: {
+      client: { select: { id: true, name: true, phone: true } },
+      appointments: {
+        select: {
+          id: true,
+          date: true,
+          reason: true,
+        },
+        orderBy: { date: "desc" }
+      }
+    }
   });
 }
 
-export async function getAllPets(): Promise<Pet[]> {
-  return prisma.pet.findMany();
-}
-
-export async function deletePet(id: string): Promise<Pet> {
-  return prisma.pet.delete({
-    where: { id },
-  });
-}
-
-export async function getPetsByClientId(clientId: string): Promise<Pet[]> {
-  return prisma.pet.findMany({
-    where: { clientId },
-  });
+export async function deletePet(id: string) {
+  return prisma.pet.delete({ where: { id } });
 }
