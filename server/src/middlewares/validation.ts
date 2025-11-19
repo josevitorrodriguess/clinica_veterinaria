@@ -1,68 +1,58 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
 
-// Middleware para validar o body da requisição
+const formatZodError = (error: ZodError) => ({
+	message: "Dados inválidos",
+	errors: error.issues.map(issue => ({
+		campo: issue.path.join("."),
+		mensagem: issue.message,
+	})),
+});
+
+
 export const validateBody = (schema: z.ZodType<any>) => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const validatedData = schema.parse(req.body);
-			req.body = validatedData;
+			const parsed = schema.parse(req.body);
+			req.body = parsed;
 			next();
 		} catch (error) {
 			if (error instanceof ZodError) {
-				return res.status(400).json({
-					message: "Dados de entrada inválidos",
-					errors: error.issues.map((err: any) => ({
-						campo: err.path.join("."),
-						mensagem: err.message,
-					})),
-				});
+				return res.status(400).json(formatZodError(error));
 			}
-			next(error);
+			return next(error);
 		}
 	};
 };
 
-// Middleware para validar parâmetros da URL
+
 export const validateParams = (schema: z.ZodType<any>) => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const validatedParams = schema.parse(req.params);
-			(req as any).params = validatedParams;
+			const parsed = schema.parse(req.params);
+			(req as any).validatedParams = parsed; // ← seguro
 			next();
 		} catch (error) {
 			if (error instanceof ZodError) {
-				return res.status(400).json({
-					message: "Parâmetros inválidos",
-					errors: error.issues.map((err: any) => ({
-						campo: err.path.join("."),
-						mensagem: err.message,
-					})),
-				});
+				return res.status(400).json(formatZodError(error));
 			}
-			next(error);
+			return next(error);
 		}
 	};
 };
 
-// Middleware para validar query parameters
+
 export const validateQuery = (schema: z.ZodType<any>) => {
 	return (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const validatedQuery = schema.parse(req.query);
-			(req as any).query = validatedQuery;
+			const parsed = schema.parse(req.query);
+			(req as any).validatedQuery = parsed; // ← seguro
 			next();
 		} catch (error) {
 			if (error instanceof ZodError) {
-				return res.status(400).json({
-					message: "Parâmetros de consulta inválidos",
-					errors: error.issues.map((err: any) => ({
-						campo: err.path.join("."),
-						mensagem: err.message,
-					})),
-				});
+				return res.status(400).json(formatZodError(error));
 			}
-			next(error);
+			return next(error);
 		}
 	};
 };
